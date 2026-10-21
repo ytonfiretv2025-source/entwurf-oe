@@ -100,6 +100,13 @@ document.body.insertAdjacentHTML('beforeend', `
       <div class="consent-dialog-actions"><button class="cookie-button cookie-secondary" id="consent-reject" type="button">Nur notwendige</button><button class="cookie-button cookie-secondary" id="consent-all" type="button">Alles erlauben</button><button class="cookie-button cookie-primary" id="consent-save" type="button">Auswahl speichern</button></div>
     </form>
   </dialog>
+  <dialog class="image-viewer" id="image-viewer" aria-label="Bildansicht">
+    <button class="image-viewer-close" type="button" aria-label="Bildansicht schließen">×</button>
+    <button class="image-viewer-nav image-viewer-prev" type="button" aria-label="Vorheriges Bild">‹</button>
+    <figure class="image-viewer-figure"><img class="image-viewer-image" alt=""><figcaption class="image-viewer-caption"></figcaption></figure>
+    <button class="image-viewer-nav image-viewer-next" type="button" aria-label="Nächstes Bild">›</button>
+    <span class="image-viewer-counter" aria-live="polite"></span>
+  </dialog>
   <a class="whatsapp-float" id="whatsapp-float" href="https://wa.me/?text=Moin%21%20Ich%20interessiere%20mich%20f%C3%BCr%20ein%20Golftraining%20und%20freue%20mich%20%C3%BCber%20weitere%20Informationen." target="_blank" rel="noopener noreferrer" aria-label="Oliver Eckstein per WhatsApp kontaktieren" title="Per WhatsApp anfragen">
     <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16.02 3.2A12.7 12.7 0 0 0 5.1 22.38L3.3 28.8l6.57-1.72A12.7 12.7 0 1 0 16.02 3.2Zm0 23.2c-1.92 0-3.8-.51-5.44-1.48l-.39-.23-3.9 1.02 1.04-3.8-.25-.4a10.5 10.5 0 1 1 8.94 4.89Zm5.76-7.87c-.32-.16-1.89-.93-2.18-1.04-.29-.1-.5-.16-.71.16-.21.32-.82 1.04-1 1.25-.19.21-.37.24-.69.08-.32-.16-1.34-.49-2.55-1.57-.94-.84-1.58-1.88-1.76-2.2-.18-.31-.02-.49.14-.64.14-.14.32-.37.48-.55.16-.18.21-.31.32-.52.1-.21.05-.4-.03-.56-.08-.15-.71-1.72-.97-2.36-.26-.62-.52-.53-.71-.54h-.61c-.21 0-.56.08-.85.4-.29.31-1.11 1.08-1.11 2.64s1.14 3.06 1.3 3.27c.16.21 2.23 3.4 5.4 4.77.75.32 1.34.52 1.8.67.76.24 1.45.21 2 .13.61-.09 1.89-.77 2.16-1.52.26-.75.26-1.39.18-1.52-.08-.13-.29-.21-.61-.37Z"/></svg>
   </a>
@@ -190,6 +197,82 @@ const whatsappNumber = String(mediaUrls.whatsappNumber || '').replace(/\D/g, '')
 if (whatsappNumber) document.querySelector('#whatsapp-float').href = `https://wa.me/${whatsappNumber}?text=Moin%21%20Ich%20interessiere%20mich%20f%C3%BCr%20ein%20Golftraining%20und%20freue%20mich%20%C3%BCber%20weitere%20Informationen.`;
 
 renderMapPlaceholder();
+
+// Bilder lassen sich vergrößern; innerhalb einer Galerie ist Blättern möglich.
+const imageViewer = document.querySelector('#image-viewer');
+const viewerImage = imageViewer.querySelector('.image-viewer-image');
+const viewerCaption = imageViewer.querySelector('.image-viewer-caption');
+const viewerCounter = imageViewer.querySelector('.image-viewer-counter');
+const viewerPrev = imageViewer.querySelector('.image-viewer-prev');
+const viewerNext = imageViewer.querySelector('.image-viewer-next');
+let viewerImages = [];
+let viewerIndex = 0;
+let touchStartX = null;
+
+const showViewerImage = index => {
+  viewerIndex = (index + viewerImages.length) % viewerImages.length;
+  const image = viewerImages[viewerIndex];
+  viewerImage.src = image.currentSrc || image.src;
+  viewerImage.alt = image.alt || 'Vergrößertes Golfbild';
+  viewerCaption.textContent = image.alt || '';
+  const hasMultipleImages = viewerImages.length > 1;
+  viewerPrev.hidden = !hasMultipleImages;
+  viewerNext.hidden = !hasMultipleImages;
+  viewerCounter.hidden = !hasMultipleImages;
+  viewerCounter.textContent = `${viewerIndex + 1} / ${viewerImages.length}`;
+};
+
+const openImageViewer = image => {
+  const gallery = image.closest('.gallery-grid');
+  viewerImages = gallery
+    ? [...gallery.querySelectorAll('img:not([hidden])')]
+    : [image];
+  viewerIndex = Math.max(0, viewerImages.indexOf(image));
+  showViewerImage(viewerIndex);
+  if (!imageViewer.open) imageViewer.showModal();
+};
+
+document.querySelectorAll('.gallery-grid img, .teaser-image img, .about-photo img').forEach(image => {
+  image.tabIndex = 0;
+  image.setAttribute('role', 'button');
+  image.setAttribute('aria-label', `Bild vergrößern: ${image.alt || 'Golfbild'}`);
+  image.title = 'Bild vergrößern';
+  image.addEventListener('click', event => {
+    event.preventDefault();
+    openImageViewer(image);
+  });
+  image.addEventListener('keydown', event => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    openImageViewer(image);
+  });
+});
+
+document.querySelector('.image-viewer-close').addEventListener('click', () => imageViewer.close());
+viewerPrev.addEventListener('click', () => showViewerImage(viewerIndex - 1));
+viewerNext.addEventListener('click', () => showViewerImage(viewerIndex + 1));
+imageViewer.addEventListener('click', event => {
+  if (event.target === imageViewer) imageViewer.close();
+});
+imageViewer.addEventListener('keydown', event => {
+  if (viewerImages.length < 2) return;
+  if (event.key === 'ArrowLeft') {
+    event.preventDefault();
+    showViewerImage(viewerIndex - 1);
+  } else if (event.key === 'ArrowRight') {
+    event.preventDefault();
+    showViewerImage(viewerIndex + 1);
+  }
+});
+viewerImage.addEventListener('touchstart', event => {
+  touchStartX = event.changedTouches[0]?.clientX ?? null;
+}, { passive: true });
+viewerImage.addEventListener('touchend', event => {
+  if (touchStartX === null || viewerImages.length < 2) return;
+  const distance = event.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(distance) > 45) showViewerImage(viewerIndex + (distance < 0 ? 1 : -1));
+  touchStartX = null;
+}, { passive: true });
 
 // Dezente Scroll-Einblendungen und Lesefortschritt, mit Rücksicht auf reduzierte Bewegung.
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

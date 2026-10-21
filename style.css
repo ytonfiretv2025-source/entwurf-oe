@@ -110,3 +110,16 @@
 @media (max-width: 620px) { .reveal-ready [data-reveal] { transform: translate3d(0, 16px, 0); } }
 @media (prefers-reduced-motion: reduce) { .hero-content, .hero-location { animation: none; } .reveal-ready [data-reveal], .reveal-ready [data-reveal].is-visible { opacity: 1; transform: none; transition: none; } .scroll-progress { display: none; } }
 .reveal-ready .offer-card.is-visible:hover { transform: translate3d(0, -4px, 0); }
+
+/* Auf kleinen Displays Bilder vollständig und ohne überlagernde Rasterzellen zeigen */
+@media (max-width: 620px) {
+  .gallery-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-rows: auto; gap: 12px; }
+  .gallery-item, .gallery-item.gallery-large, .trainer-gallery-grid .gallery-item:first-child { grid-column: 1 / -1; grid-row: auto; min-height: 0; height: auto; aspect-ratio: auto; }
+  .gallery-item img { width: 100%; height: auto; object-fit: contain; }
+  .gallery-item:after { display: none; }
+  .teaser-image { min-height: 0; height: auto; aspect-ratio: auto; }
+  .teaser-image img { width: 100%; height: auto; object-fit: contain; }
+  .about-strip { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  .about-photo { width: 100%; min-height: 0; height: auto; aspect-ratio: 3 / 2; }
+  .about-photo img { width: 100%; height: 100%; object-fit: contain; }
+}

@@ -118,6 +118,6 @@
   .teaser-image { min-height: 0; height: auto; aspect-ratio: auto; }
   .teaser-image img { width: 100%; height: auto; object-fit: contain; }
   .about-strip { grid-template-columns: minmax(0, 1fr); gap: 22px; }
-  .about-photo { width: 100%; min-height: 0; height: auto; aspect-ratio: 3 / 2; }
-  .about-photo img { width: 100%; height: 100%; object-fit: contain; }
+  .about-photo { width: 100%; min-height: 0; height: auto; aspect-ratio: 4 / 5; }
+  .about-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 48%; }
 }

@@ -108,10 +108,24 @@ document.body.insertAdjacentHTML('beforeend', `
 const cookieBanner = document.querySelector('#cookie-banner');
 const consentDialog = document.querySelector('#consent-dialog');
 const externalConsentToggle = document.querySelector('#consent-external');
+const whatsappButton = document.querySelector('#whatsapp-float');
+const positionWhatsApp = () => {
+  if (!whatsappButton) return;
+  if (cookieBanner.hidden) {
+    whatsappButton.style.removeProperty('bottom');
+    return;
+  }
+  const gap = 16;
+  const freeSpaceAboveBanner = window.innerHeight - cookieBanner.getBoundingClientRect().top;
+  whatsappButton.style.bottom = `${freeSpaceAboveBanner + gap}px`;
+};
 const showCookieBanner = visible => {
   cookieBanner.hidden = !visible;
   document.body.classList.toggle('cookie-banner-visible', visible);
+  positionWhatsApp();
 };
+window.addEventListener('resize', positionWhatsApp, { passive: true });
+if ('ResizeObserver' in window) new ResizeObserver(positionWhatsApp).observe(cookieBanner);
 const openConsentDialog = () => {
   externalConsentToggle.checked = Boolean(consentState?.externalMedia);
   if (typeof consentDialog.showModal === 'function') consentDialog.showModal();

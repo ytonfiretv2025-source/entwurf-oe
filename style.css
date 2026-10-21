@@ -121,3 +121,11 @@
   .about-photo { width: 100%; min-height: 0; height: auto; aspect-ratio: 4 / 5; }
   .about-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 48%; }
 }
+
+/* Einzelnes, zentrales Angebot für das Gruppentraining */
+.offer-grid-single { width: min(780px, 100%); margin-inline: auto; grid-template-columns: minmax(0, 1fr); }
+.offer-grid-single .offer-card { padding: clamp(28px, 5vw, 52px); }
+.offer-grid-single .offer-card h2 { font-size: clamp(29px, 4vw, 38px); }
+.offer-grid-single .offer-card > p:not(.card-number) { max-width: 620px; min-height: 0; font-size: 13px; }
+.offer-grid-single .offer-card ul { margin: 18px 0 24px; font-size: 12px; }
+.offer-grid-single .price strong { font-size: 18px; }
